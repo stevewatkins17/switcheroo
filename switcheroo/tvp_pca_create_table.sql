@@ -50,6 +50,10 @@ BEGIN
                 CASE WHEN c.collation_name IS NOT NULL AND c.system_type_id = c.user_type_id   
                     THEN N' COLLATE ' + c.collation_name  
                     ELSE N''  
+                END  +    
+                CASE WHEN x.[name] is not null 
+                    THEN concat(N'(CONTENT [' ,schema_name(x.[schema_id]) ,N'].[' ,x.[name] ,N']) ' )
+                    ELSE N''   
                 END +  
                 CASE WHEN c.is_nullable = 1   
                     THEN N' NULL'  
@@ -59,7 +63,7 @@ BEGIN
                     THEN N' IDENTITY(' + CAST(IDENTITYPROPERTY(c.[object_id], 'SeedValue') AS NVARCHAR(24)) + N',' +   
                                     CAST(IDENTITYPROPERTY(c.[object_id], 'IncrementValue') AS NVARCHAR(24)) + N')'   
                     ELSE N''   
-                END +    
+                END +
                 CASE WHEN ic.[is_not_for_replication] = 1 
                     THEN N' NOT FOR REPLICATION '   
                     ELSE N''   
@@ -73,6 +77,7 @@ BEGIN
     JOIN sys.types tp ON c.user_type_id = tp.user_type_id 
     LEFT JOIN sys.computed_columns cc on c.[object_id] = cc.[object_id] and c.[column_id] = cc.[column_id] and c.[is_computed] = 1 and cc.[is_persisted] = 1  
     LEFT JOIN [sys].[identity_columns] ic on c.[object_id] = ic.[object_id] and c.[column_id] = ic.[column_id] and ic.[is_not_for_replication] = 1  
+    left join [sys].[xml_schema_collections] x on x.[xml_collection_id] = c.[xml_collection_id]
     WHERE c.[object_id] = @source_objid  
     ORDER BY c.column_id  
     FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 7, '      ') + NCHAR(13) + N') '  
@@ -108,15 +113,16 @@ go
     -- N'Billing'
     --,N'CLAIM_PROFILE_FORMATS'
     -- dbo.AUDIT_SCHED
+    -- [Sales].[Store]
 -- source_column_name: li_durationinhours target: tstmirrorBilling.LINE_ITEMS, source: Billing.LINE_ITEMS
 
 declare @CreateMirrorTable nvarchar(max) = (
 
 select [stmt] from
 [dbo].[tvp_pca_create_table](
-     N'Billing'
-    ,N'LINE_ITEMS'
-    ,N'tstmirrorBilling'
+     N'Sales'
+    ,N'Store'
+    ,N'tstmirrorSales'
 ) x
 where x.[stmt_type] = N'CreateMirrorTable')
 ;

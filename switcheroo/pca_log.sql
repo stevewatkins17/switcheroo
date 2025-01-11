@@ -9,7 +9,7 @@ GO
 begin
   create table [dbo].[pca_log](
 	    [rid] int identity(0,1) not null 
-    ,[event_name] [nvarchar](128) not null
+    ,[event_name] [nvarchar](256) not null
 	  ,[obj_schema_name] [nvarchar](128) null
 	  ,[obj_name] [nvarchar](128) null
     ,[insert_ts] datetimeoffset not null

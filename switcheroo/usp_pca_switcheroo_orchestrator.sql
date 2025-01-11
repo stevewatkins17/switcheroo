@@ -18,18 +18,6 @@ begin
 
   set @stage_schema = concat(@project_code ,N'stage'  ,@original_schema)
   set @mirror_schema = concat(@project_code ,N'mirror' ,@original_schema);
-  
-  if object_id('[dbo].[pca_log]') is null
-  begin
-    create table [dbo].[pca_log](
-	     [rid] int identity(0,1) not null 
-      ,[event_name] [nvarchar](32) not null
-	    ,[obj_schema_name] [nvarchar](128) null
-	    ,[obj_name] [nvarchar](128) null
-      ,[insert_ts] datetimeoffset not null
-      ,[msg] [nvarchar](4000) null
-      );
-  end
 
   insert into [dbo].[pca_log]([event_name] ,[obj_schema_name] ,[obj_name] ,[insert_ts] ,[msg])
   values('session_begin' ,null ,null ,@now ,null); 
@@ -56,7 +44,7 @@ begin
         s1.[is_ms_shipped] = 0
         and SCHEMA_NAME(s1.[schema_id]) = @original_schema
         --AND s1.[name] NOT IN ('PC_CACHE_AGENTSPATIENTS_AP', 'PC_CACHE_PC_EPISODES_AP')
-        AND s1.[name] NOT IN('pca_log')
+        AND s1.[name] NOT IN('pca_log' ,'pca_ixc_properties' ,'pca_ix_properties' ,'pca_validation_log')
         order by 1,2,3;
   end
 
